@@ -1,4 +1,8 @@
 # Mapping bacterial sialic acid metabolism pathways in sequencing data of inflammatory bowel diseases and _Clostridioides difficile_ infection.
+<img width="193" alt="Captura de Tela 2025-06-09 às 09 58 10" src="https://github.com/user-attachments/assets/8818ef69-0de2-4283-8e07-f37f7458a15b" />
+<img width="182" alt="Captura de Tela 2025-06-09 às 09 57 56" src="https://github.com/user-attachments/assets/1e085ad8-f184-4e28-a370-d6d9d940490e" />
+
+![FMRP](https://github.com/user-attachments/assets/9fc3cb8c-c59b-44e3-ad68-3b1d5779e4c9)
 
 **1. Introduction**
 
@@ -94,9 +98,9 @@ Afterwards, blast2lca was used to perform the taxonomic attribution, with the fo
 
 **2.11. Calculation of sequence abundance**
 
-To calculate the abundance of reads for each gene, the CDSs aligned on step 2.7. and extracted on step 2.9. were used. Bowtie2 2.4.1 was used for the alignment with the following command to create the indexes:
+To calculate the abundance of reads for each gene, the CDSs predicted on step 2.6. were used. Bowtie2 2.4.1 was used for the alignment with the following command to create the indexes:
 
-`bowtie2-build {acession_number}_genes.fasta {acession_number}_index`
+`bowtie2-build ../prodigal/{acession_number}_genes.fasta {acession_number}_index`
 
 and the following for alignemnt:
 
@@ -116,6 +120,9 @@ The normalization was performed using the script python_normalization_V2.py, tha
 
 The counting was carried out with the script python_count.py, with the following command:
 
-`python3 python_count.py {acession_number}_normalized_v2.txt ../diamond/{acession_number}_{protein}.tsv {acession_number}_{protein}_counted.tsv
-`
+`python3 python_count.py {acession_number}_normalized_v2.txt ../diamond/{acession_number}_{protein}.tsv {acession_number}_{protein}_counted.tsv`
+
+**2.12. Other analysis**
+
+The output from step 2.10 and 2.11 (abundance_data.csv) were  used for the analysis in the Metagenomic_analysis.ipynb, together with the conditions.csv file. Please refer to the notebook for further information.
 
