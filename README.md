@@ -1,8 +1,9 @@
 # Mapping bacterial sialic acid metabolism pathways in sequencing data of inflammatory bowel diseases and _Clostridioides difficile_ infection.
+<div align="center">
 <img width="193" alt="Captura de Tela 2025-06-09 às 09 58 10" src="https://github.com/user-attachments/assets/8818ef69-0de2-4283-8e07-f37f7458a15b" />
 <img width="182" alt="Captura de Tela 2025-06-09 às 09 57 56" src="https://github.com/user-attachments/assets/1e085ad8-f184-4e28-a370-d6d9d940490e" />
-
-![FMRP](https://github.com/user-attachments/assets/9fc3cb8c-c59b-44e3-ad68-3b1d5779e4c9)
+<img width="182" alt="Captura de Tela 2025-06-09 às 09 57 56" src="https://github.com/user-attachments/assets/9fc3cb8c-c59b-44e3-ad68-3b1d5779e4c9" />
+</div>
 
 **1. Introduction**
 
