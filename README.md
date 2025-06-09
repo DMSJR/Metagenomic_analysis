@@ -30,7 +30,7 @@ Data trimming was performed using Trimmomatic 0.40, using TruSeq3-PE adapters, w
 
 **2.3. Filtering human contaminant sequences**
 
-In order to remove sequences from the human host, bowtie2 2.4.1 was used. The genome index was created using:
+In order to remove sequences from the human host, bowtie2 2.4.1 was used with the GRCh38 genome. The genome index was created using:
 
 `bowtie2-build GRCh38.fa human_genome`
 
@@ -52,10 +52,70 @@ To assemble the reads, Megahit 1.2.9 was used, with the following command:
 
 `megahit -r {accession_number}.extendedFrags.fastq -1 {accession_number}_paired_bt2_filtered.1 -2 {accession_number}_paired_bt2_filtered.2 -o {accession_number}_output`
 
-**2.6. Coding DNA sequece prediction**
+**2.6. Coding DNA sequeces (CDS) prediction**
 
 Prodigal 2.6.3 was used to predict CDSs using the following command:
 
 `prodigal -i {accession_number}_output/final.contigs.fa -o {accession_number}_coordinates -a {accession_number}_proteins.faa -d {accession_number}_genes.fasta -f gff`
 
-**
+**2.7. Search for Sia-related proteins by alignment**
+
+Diamond 0.9.24 was used to search for genes related to Sia metabolism and transport. The selection of reference sequences is described in section 2.8. To create databases for aligment the following command was used, for each one of the files containing reference sequences:
+
+diamond makedb --in {reference_protein_name}.fasta -d reference_protein_name
+
+The alignment was performed using the following command:
+
+`diamond blastp -q {reference_protein_name}_proteins.faa -d /diamond_db/{protein} -o {accession_number}_{protein}.tsv -f 6 qseqid qlen sallseqid slen evalue length pident`
+
+**2.8. Selection of reference protein sequences**
+
+To gather reference protein sequences, the annotated known DNA sequences were downloaded from NCBI and used on a blastx search at Uniprot. Sequences with at least 40% identity and coverage were used for the reference database, in agreement with Pearson (2013) work (doi: 10.1002/0471250953.bi0301s42). The list of proteins searched can be found in the file protein_list.txt
+
+**2.9. Selection of aligned proteins**
+
+The proteins aligned to the reference, with at least 40% identity and coverage, were used for further analysis. To obtain the sequence of such sequences, it was used the script get_cds_prodigal_diamond.py, that can be found in the repository, with the following command:
+
+`python3 get_cds_prodigal_diamond.py ../diamond/{acession_number}_{protein}.tsv ../prodigal/{acession_number}_{protein}.faa {acession_number}_{protein}_proteins_aligned.faa`
+
+**2.10. Taxonomic identification of detected sequences**
+
+Diamond 0.9.24 was used for aligning the selected CDSs against the NCBI nr database. The database was created with the command:
+
+'diamond makedb --in nr.faa -d nr_diamond --taxonmap  prot.accession2taxid.gz --taxonnodes nodes.dmp'
+
+The alignment was performed with the following command:
+
+`diamond blastp -q ../aligned_proteins/{acession_number}_{protein}_proteins_aligned.faa -d ../nr-faa/nr_diamond -o {acession_number}_{protein}_diamond_tax.tsv --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --max-target-seqs 10 --evalue 1e-5 --threads 4`
+
+Afterwards, blast2lca was used to perform the taxonomic attribution, with the following command:
+
+`blast2lca -i {acession_number}_{protein}_diamond_tax.tsv -o {acession_number}_{protein}_blast2lca.txt --mapDB megan-nucl-Feb2022.db`
+
+**2.11. Calculation of sequence abundance**
+
+To calculate the abundance of reads for each gene, the CDSs aligned on step 2.7. and extracted on step 2.9. were used. Bowtie2 2.4.1 was used for the alignment with the following command to create the indexes:
+
+`bowtie2-build {acession_number}_genes.fasta {acession_number}_index`
+
+and the following for alignemnt:
+
+`bowtie2 -x {acession_number}_index -1 {accession_number}_paired_bt2_filtered.1.gz -2 {accession_number}_paired_bt2_filtered.2.gz  -S {accession_number}.sam --very-sensitive`
+
+The sam files were converted to bam with samtools command:
+
+`samtools view -bS {acession_number}.sam | samtools sort -o {acession_number}.sorted.bam`
+
+and the reads were counted with the command:
+
+`samtools idxstats {acession_number}.sorted.bam > {acession_number}_counts.txt`
+
+The normalization was performed using the script python_normalization_V2.py, that can be found in the repository, with the following command:
+
+`python3 python_normalization_v2.py {acession_number}_counts.txt  {acession_number}_normalized_v2.txt`
+
+The counting was carried out with the script python_count.py, with the following command:
+
+`python3 python_count.py {acession_number}_normalized_v2.txt ../diamond/{acession_number}_{protein}.tsv {acession_number}_{protein}_counted.tsv
+`
+
